@@ -1,0 +1,21 @@
+{
+	"fmt": {
+		"lineWidth": 140,
+		"semiColons": false,
+		"singleQuote": true,
+		"useTabs": true
+	},
+	"lint": {
+		"rules": {
+			"include": [
+				"no-external-import",
+				"explicit-module-boundary-types",
+				"camel-case"
+			]
+		}
+	},
+	"lock": false,
+	"imports": {
+		"asserts": "https://deno.land/std@0.212.0/assert/mod.ts"
+	}
+}
