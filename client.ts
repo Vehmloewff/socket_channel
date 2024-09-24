@@ -6,7 +6,7 @@ export class SocketClient {
 	#address: URL
 	#socketPromise: Promise<WebSocket>
 	#fatalErrorHandler: ErrorHandler | null = null
-	#modelListeners = new Set<(pin: string, model: unknown) => void>()
+	#modelListeners = new Set<(pin: string | null, model: unknown) => void>()
 
 	constructor(address: URL) {
 		this.#address = address
@@ -19,7 +19,7 @@ export class SocketClient {
 		const pin = await this.#internalPing(event)
 
 		await new Promise<void>((resolve) => {
-			const listener = (respondedPin: string) => {
+			const listener = (respondedPin: string | null) => {
 				if (respondedPin !== pin) return
 
 				this.#modelListeners.delete(listener)
@@ -37,7 +37,7 @@ export class SocketClient {
 
 	/** Subscribe to model updates. Returns a function to unsubscribe */
 	subscribe(fn: (model: unknown) => void): () => void {
-		const listener = (_: string, model: unknown) => fn(model)
+		const listener = (_: string | null, model: unknown) => fn(model)
 		this.#modelListeners.add(listener)
 
 		return () => this.#modelListeners.delete(listener)
@@ -71,9 +71,6 @@ export class SocketClient {
 	#handleMessage(data: string) {
 		const message = parseSocketMessage(data)
 		if (message.prefix !== 'model') return
-
-		// If there is no message context, we want to log the error and continue, because missing one message isn't the end of the world
-		if (!message.context) return this.#handleError('Expected to receive a pin from server along with model')
 
 		for (const fn of this.#modelListeners) {
 			fn(message.context, message.body)

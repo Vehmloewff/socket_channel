@@ -45,7 +45,7 @@ pub struct Connection {
 impl Connection {
 	pub async fn next_event_with_timeout(&mut self, timeout: Duration) -> Option<Event> {
 		let res = {
-			let foo = select(self.next_event().boxed(), sleep(timeout).boxed()).await;
+			let foo = select(self.next_socket_event().boxed(), sleep(timeout).boxed()).await;
 
 			match foo {
 				Either::Left((event, _)) => Some(event),
@@ -62,10 +62,6 @@ impl Connection {
 				None
 			}
 		}
-	}
-
-	pub async fn next_event(&mut self) -> Option<Event> {
-		None
 	}
 
 	pub async fn next_socket_event(&mut self) -> Option<Event> {
